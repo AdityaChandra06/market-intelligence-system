@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Conda
+.env
+.venv
+
+# VS Code
+.vscode/
+
+# Data
+data/raw/
+data/processed/
+
+# Models
+models/
+checkpoints/
+
+# Logs
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
