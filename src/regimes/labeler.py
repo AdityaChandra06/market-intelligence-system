@@ -1,0 +1,97 @@
+import pandas as pd
+import numpy as np
+from pathlib import Path
+
+FEATURE_DIR = Path("data/features")
+REGIME_DIR = Path("data/regimes")
+
+REGIME_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def label_regimes(ticker: str):
+
+    input_path = FEATURE_DIR / f"{ticker}.parquet"
+    output_path = REGIME_DIR / f"{ticker}.parquet"
+
+    print(f"Labeling regimes for {ticker}...")
+
+    df = pd.read_parquet(input_path)
+
+    # =========================
+    # Trend Signal
+    # =========================
+
+    df["trend_signal"] = (
+        df["sma_20"] - df["sma_50"]
+    )
+
+    # =========================
+    # Rolling Max for Drawdown
+    # =========================
+
+    rolling_max = df["close"].cummax()
+
+    df["drawdown"] = (
+        df["close"] - rolling_max
+    ) / rolling_max
+
+    # =========================
+    # Initialize Regime Column
+    # =========================
+
+    df["regime"] = "sideways"
+
+    # =========================
+    # Panic Regime
+    # =========================
+
+    panic_condition = (
+        (df["rolling_vol_20"] > 0.40) &
+        (df["drawdown"] < -0.15)
+    )
+
+    df.loc[panic_condition, "regime"] = "panic"
+
+    # =========================
+    # Bear Regime
+    # =========================
+
+    bear_condition = (
+        (df["trend_signal"] < 0) &
+        (df["rolling_vol_20"] > 0.20)
+    )
+
+    df.loc[bear_condition, "regime"] = "bear"
+
+    # =========================
+    # Bull Regime
+    # =========================
+
+    bull_condition = (
+        (df["trend_signal"] > 0) &
+        (df["rolling_vol_20"] < 0.25)
+    )
+
+    df.loc[bull_condition, "regime"] = "bull"
+
+    # Save regime dataset
+    df.to_parquet(output_path)
+
+    print(f"Saved regimes -> {output_path}")
+
+
+if __name__ == "__main__":
+
+    tickers = [
+        "SPY",
+        "QQQ",
+        "AAPL",
+        "MSFT",
+        "JPM",
+        "XOM"
+    ]
+
+    for ticker in tickers:
+        label_regimes(ticker)
+
+    print("Regime labeling complete.")
