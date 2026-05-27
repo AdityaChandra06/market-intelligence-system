@@ -41,16 +41,6 @@ def label_regimes(ticker: str):
 
     df["regime"] = "sideways"
 
-    # =========================
-    # Panic Regime
-    # =========================
-
-    panic_condition = (
-        (df["rolling_vol_20"] > 0.40) &
-        (df["drawdown"] < -0.15)
-    )
-
-    df.loc[panic_condition, "regime"] = "panic"
 
     # =========================
     # Bear Regime
@@ -62,6 +52,19 @@ def label_regimes(ticker: str):
     )
 
     df.loc[bear_condition, "regime"] = "bear"
+
+    # =========================
+    # Panic Regime
+    # =========================
+
+    panic_condition = (
+        (df["rolling_vol_20"] > 0.3)&
+        (df["drawdown"] < -0.10)
+    )
+
+    df.loc[panic_condition, "regime"] = "panic"
+
+    
 
     # =========================
     # Bull Regime
