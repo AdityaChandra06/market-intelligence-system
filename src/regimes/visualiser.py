@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from pathlib import Path
 
-df= pd.read_parquet(Path("data/regimes/XOM.parquet"))
+df= pd.read_parquet(Path("data/regimes/MSFT.parquet"))
 
 # Create a color mapping for regimes
 regime_colors = {
@@ -22,7 +22,7 @@ fig.add_trace(
         x=df.index,
         y=df["close"],
         mode="lines",
-        name="XOM Close",
+        name="MSFT Close",
         line=dict(color="blue")
     )
 )
@@ -47,7 +47,7 @@ for regime, color in regime_colors.items():
 
 # Layout
 fig.update_layout(
-    title="XOM Market Regimes",
+    title="MSFT Market Regimes",
     xaxis_title="Date",
     yaxis_title="Price",
     template="plotly_dark",
@@ -70,7 +70,7 @@ vol_fig.add_trace(
 )
 
 vol_fig.update_layout(
-    title="XOM Rolling Volatility",
+    title="MSFT Rolling Volatility",
     xaxis_title="Date",
     yaxis_title="Volatility",
     template="plotly_dark",

@@ -56,6 +56,56 @@ def generate_features(ticker: str):
         df["close"] / df["close"].shift(10)
     ) - 1
 
+    #=========================
+    #Trend Strength
+    #=========================
+
+    df["trend_strength"] = (
+        (df["sma_20"] - df["sma_50"])
+        / df["close"]
+    )
+
+    # =========================
+    # Volatility Percentile
+    # =========================
+
+    df["volatility_percentile"] = (
+        df["rolling_vol_20"]
+        .rolling(252)
+        .rank(pct=True)
+    )
+
+    # =========================
+    # Distance From SMA20
+    # =========================
+
+    df["distance_from_sma20"] = (
+        (df["close"] - df["sma_20"])
+        / df["sma_20"]
+    )
+
+    # =========================
+    # Rolling Sharpe Ratio
+    # =========================
+
+    rolling_mean = (
+        df["returns"]
+        .rolling(20)
+        .mean()
+    )
+
+
+    rolling_std = (
+        df["returns"]
+        .rolling(20)
+        .std()
+    )
+
+    df["rolling_sharpe"] = (
+        rolling_mean / rolling_std
+    ) * np.sqrt(252)
+
+
     # =========================
     # Bollinger Bands
     # =========================
@@ -69,6 +119,7 @@ def generate_features(ticker: str):
     df["bollinger_lower"] = (
         df["sma_20"] - 2 * rolling_std
     )
+
 
     # =========================
     # Relative Volume

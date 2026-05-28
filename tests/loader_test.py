@@ -1,4 +1,4 @@
-from data.loader import load_asset
+from src.data.loader import load_asset
 
 df = load_asset("SPY")
 

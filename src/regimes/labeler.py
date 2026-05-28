@@ -41,13 +41,25 @@ def label_regimes(ticker: str):
 
     df["regime"] = "sideways"
 
+    #=========================
+    #Sideways Regime
+    #=========================
+
+    sideways_condition = (
+        (abs(df["trend_strength"]) < 0.01)
+        &
+        (df["rolling_vol_20"] < 0.25)
+    )
+
+    df.loc[sideways_condition, "regime"] = "sideways"
+
 
     # =========================
     # Bear Regime
     # =========================
 
     bear_condition = (
-        (df["trend_signal"] < 0) &
+        (df["trend_signal"] < -0.1) &
         (df["rolling_vol_20"] > 0.20)
     )
 
@@ -58,8 +70,11 @@ def label_regimes(ticker: str):
     # =========================
 
     panic_condition = (
-        (df["rolling_vol_20"] > 0.3)&
-        (df["drawdown"] < -0.10)
+        (df["rolling_vol_20"] > 0.35)
+        &
+        (df["drawdown"] < -0.20)
+        &
+        (df["momentum_10"] < -0.10)
     )
 
     df.loc[panic_condition, "regime"] = "panic"
@@ -71,16 +86,33 @@ def label_regimes(ticker: str):
     # =========================
 
     bull_condition = (
-        (df["trend_signal"] > 0) &
-        (df["rolling_vol_20"] < 0.25)
+        (df["trend_signal"] > 0.0) &
+        (df["rolling_vol_20"] < 0.3)
     )
 
     df.loc[bull_condition, "regime"] = "bull"
+
+    # =========================
+    # Regime Encoding
+    # =========================
+
+    regime_mapping = {
+        "sideways": 0,
+        "bull": 1,
+        "bear": 2,
+        "panic": 3
+    }
+
+    df["regime_code"] = (
+        df["regime"]
+        .map(regime_mapping)
+    )
 
     # Save regime dataset
     df.to_parquet(output_path)
 
     print(f"Saved regimes -> {output_path}")
+
 
 
 if __name__ == "__main__":
